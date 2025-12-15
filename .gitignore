@@ -1,0 +1,20 @@
+
+node_modules   
+uploads
+dist
+build
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+#Security
+.env
+config\gap-distribution-firebase-adminsdk.json 
