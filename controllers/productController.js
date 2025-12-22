@@ -6,12 +6,10 @@ const addProduct = async(req, res) => {
         
         const {name, stockCartons,piecesPerCarton, retailPrice,wholesalePrice, categoryId} = req.body 
 
-
+         let imageUrl = null
         if (req.file) {
-            // Convertir le buffer de l'image en chaîne Base64
             const b64 = Buffer.from(req.file.buffer).toString('base64');
-            // Créer une "Data URL" complète que le navigateur comprend
-            let mimeType = req.file.mimetype; // ex: 'image/jpeg'
+            let mimeType = req.file.mimetype; 
             imageUrl = `data:${mimeType};base64,${b64}`;
         }
         if (!imageUrl || !name || !stockCartons  || !retailPrice || !wholesalePrice || !categoryId) {
@@ -185,23 +183,28 @@ const updateProduct = async(req, res) => {
         if (retailPrice !== undefined) updateProductData.retailPrice = Number(retailPrice);
         if (wholesalePrice !== undefined) updateProductData.wholesalePrice = Number(wholesalePrice);
         if (categoryId) updateProductData.categoryId = categoryId
-
-  if (req.file) {
-            // Convertir le buffer de l'image en chaîne Base64
+    
+    
+        let imageUrl = null;
+         if (req.file) {
+            // Convertir le buffer de l'image en chaine Base64
             const b64 = Buffer.from(req.file.buffer).toString('base64');
-            // Créer une "Data URL" complète que le navigateur comprend
-            let mimeType = req.file.mimetype; // ex: 'image/jpeg'
+            // Creation d'une "Data URL" complète
+            let mimeType = req.file.mimetype; 
             imageUrl = `data:${mimeType};base64,${b64}`;
+        }
+         if (imageUrl) {
+            updateProductData.image = imageUrl
         }
 
         const newProduct = await updateProductInDB(
             id,
             updateProductData,    
             )
-        return res.status(200).json( {success:true, message:`Produit ${newProduct} ajoute avec succes`})
+        return res.status(200).json( {success:true, message:`Produit ${newProduct} modifee avec succes`})
 
     } catch (error) {
-        console.error('Erreur Produit non ajoute', error );
+        console.error('Erreur Produit non modifie', error );
         return res.status(500).json({ success: false, message: ' Erreur serveur '})
         
     }
