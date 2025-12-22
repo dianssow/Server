@@ -5,10 +5,9 @@ const addProduct = async(req, res) => {
     try {
         
         const {name, stockCartons,piecesPerCarton, retailPrice,wholesalePrice, categoryId} = req.body 
-        // const imagePath = req.file ? `uploads/${req.file.filename}`: null
 
 
-         if (!imagePath || !name || !stockCartons  || !retailPrice || !wholesalePrice || !categoryId) {
+         if (!imageUrl || !name || !stockCartons  || !retailPrice || !wholesalePrice || !categoryId) {
          return res.status(400).json({ success: false, message: "Tous les champs sont requis" })
         }
 
