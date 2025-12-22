@@ -1,6 +1,6 @@
 import express from 'express'
 import {addVersement, getVersements, getCustomerVersements, getCustomerBalance} from '../controllers/versementController.js'
-import authMiddleware from '../middleware/authmiddleware.js' 
+import authMiddleware from '../middleware/authMiddleware.js' 
 const router = express.Router()
 
 router.post('/add',authMiddleware, addVersement)

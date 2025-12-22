@@ -1,6 +1,6 @@
 import express from 'express'
 import {addSale, getSales, getCustomerSales, deleteSale} from '../controllers/saleController.js'
-import authMiddleware from '../middleware/authmiddleware.js'
+import authMiddleware from '../middleware/authMiddleware.js'
 const router = express.Router()
 
 router.post('/add',authMiddleware, addSale)
