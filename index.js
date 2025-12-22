@@ -27,21 +27,46 @@ app.use((req, res, next) => {
 
 app.use(
     cors({
-     origin: (origin, callback) => {
-        if(!origin) return callback(null, true)
-         if(origin && allowedOrigins.includes(origin)) {
-             return callback(null, true)
-         }
+      origin: (origin, callback) => {
+        // Log pour comprendre ce qui se passe
+        console.log("DEBUG CORS - Origin reçue:", origin); 
 
+        if(!origin) return callback(null, true);
 
+        // Vérification souple (gère avec ou sans slash final)
+        const isAllowed = allowedOrigins.some(allowed => 
+            allowed === origin || allowed === origin + '/' || allowed + '/' === origin
+        );
 
-         else {
-            callback(new Error("Non autorisé par CORS"))
+        if(isAllowed) {
+             return callback(null, true);
+        } else {
+            console.error(`BLOCAGE CORS : L'origine ${origin} n'est pas dans la liste`, allowedOrigins);
+            callback(new Error("Non autorisé par CORS"));
         }
-     },
+      },
       credentials: true,
     })
 )
+
+
+// app.use(
+//     cors({
+//      origin: (origin, callback) => {
+//         if(!origin) return callback(null, true)
+//          if(origin && allowedOrigins.includes(origin)) {
+//              return callback(null, true)
+//          }
+
+
+
+//          else {
+//             callback(new Error("Non autorisé par CORS"))
+//         }
+//      },
+//       credentials: true,
+//     })
+// )
 app.use(express.json())
 app.use('/api/auth', authRoutes)
 app.use('/api/category', categoryRoutes)
