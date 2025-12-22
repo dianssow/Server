@@ -5,7 +5,10 @@ import { getProducts, addProduct, updateProduct, deleteProduct, getProductsByCat
 const router = express.Router()
 
 // Multer en mémoire
-const upload = multer({ storage: multer.memoryStorage() })
+const upload = multer({ storage: multer.memoryStorage(),
+    limits: {fileSize: 1024 * 1024 * 2}
+ })
+
 
 // Routes
 router.post('/add', upload.single("image"), addProduct)

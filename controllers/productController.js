@@ -27,12 +27,13 @@ const addProduct = async(req, res) => {
         if(existingProduct) {
             return res.status(400).json({ success: false, message: `Produit existe dejà`})
         }
-    let imageUrl = null
-    if (req.file) {
-      const storageRef = ref(storage, `products/${Date.now()}-${req.file.originalname}`)
-      await uploadBytes(storageRef, req.file.buffer)
-      imageUrl = await getDownloadURL(storageRef)
-    }
+      if (req.file) {
+            // Convertir le buffer de l'image en chaîne Base64
+            const b64 = Buffer.from(req.file.buffer).toString('base64');
+            // Créer une "Data URL" complète que le navigateur comprend
+            let mimeType = req.file.mimetype; // ex: 'image/jpeg'
+            imageUrl = `data:${mimeType};base64,${b64}`;
+        }
         const newProductData =  ({
             image:imageUrl,
             name: name.trim(),
@@ -187,13 +188,13 @@ const updateProduct = async(req, res) => {
         if (wholesalePrice !== undefined) updateProductData.wholesalePrice = Number(wholesalePrice);
         if (categoryId) updateProductData.categoryId = categoryId
 
-
-        if (req.file) {
-      const storageRef = ref(storage, `products/${Date.now()}-${req.file.originalname}`)
-      await uploadBytes(storageRef, req.file.buffer)
-      const imageUrl = await getDownloadURL(storageRef)
-      updateProductData.image = imageUrl
-    }
+  if (req.file) {
+            // Convertir le buffer de l'image en chaîne Base64
+            const b64 = Buffer.from(req.file.buffer).toString('base64');
+            // Créer une "Data URL" complète que le navigateur comprend
+            let mimeType = req.file.mimetype; // ex: 'image/jpeg'
+            imageUrl = `data:${mimeType};base64,${b64}`;
+        }
 
         const newProduct = await updateProductInDB(
             id,
