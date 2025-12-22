@@ -15,8 +15,10 @@ dotenv.config()
 console.log("allowedOrigins:", process.env.CAISSE, process.env.BACKOFFICE)
 
 const allowedOrigins = [
-    process.env.CAISSE,
-    process.env.BACKOFFICE,  
+    process.env.CAISSE || 'https://gap-caisse.web.app',
+    process.env.BACKOFFICE  || 'https://gap-backoffice.web.app',  
+    'http://localhost:5173',
+    'http://localhost:5174'
 ]
 const app = express()
 app.use((req, res, next) => {
