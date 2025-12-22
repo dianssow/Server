@@ -1,7 +1,6 @@
 import express from 'express'
 import multer from 'multer'
 import { getProducts, addProduct, updateProduct, deleteProduct, getProductsByCategory, getFeaturedProducts, toggleFeaturedProduct } from '../controllers/productController.js'
-import authMiddleware from '../middleware/authmiddleware.js'
 
 const router = express.Router()
 

@@ -1,12 +1,23 @@
 import { addCategoryToDB, deleteCategoryFromDB, getAllCategorys, getCategoryById, getCategoryByName, updateCategoryInDB } from '../models/category.js'
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
+import storage from '../serviceFirebase.js'
 const addCategory = async(req, res) => {
     try {
         
         const {categoryName} = req.body 
-        const imagePath = req.file ? `uploads/${req.file.filename}`: null
-
         
-         if (!categoryName || !imagePath  ) {
+          if (!req.file) {
+      return res.status(400).json({ success: false, message: "L'image est requise" });
+    }
+
+    const storageRef = ref(storage, `categories/${Date.now()}-${req.file.originalname}`);
+
+    // Télécharger l'image dans Firebase Storage
+    await uploadBytes(storageRef, req.file.buffer);
+
+    // Récupérer l'URL publique de l'image téléchargée
+    const imageUrl = await getDownloadURL(storageRef);
+         if (!categoryName  ) {
          return res.status(400).json({ success: false, message: "Tous les champs sont requis" });
         }
 
@@ -16,8 +27,8 @@ const addCategory = async(req, res) => {
         }
 
         const categoryData = {
-            image:imagePath,
-            categoryName
+            image:imageUrl,
+            categoryName: categoryName.trim()
         }
         const newCategory = await addCategoryToDB(categoryData)
         return res.status(201).json({success: true, mesage: `Categeory ${newCategory.categoryName} ajoute avec succes` } )
@@ -44,7 +55,19 @@ const getCategories = async (req, res) => {
         try {
             const {id} = req.params
             const {categoryName} = req.body 
-            const imagePath = req.file ? `uploads/${req.file.filename}` : null
+            let imageUrl = null
+
+            if(req.file){
+                      // Créer une référence pour l'image dans Firebase Storage
+                const storageRef = ref(storage, `categories/${Date.now()}-${req.file.originalname}`);
+                
+                // Télécharger l'image dans Firebase Storage
+                await uploadBytes(storageRef, req.file.buffer);
+                
+                // Récupérer l'URL de l'image téléchargée
+                imageUrl = await getDownloadURL(storageRef);
+             }
+            
             
             const existingCategory = await getCategoryById(id)
             if(!existingCategory) {
@@ -52,8 +75,8 @@ const getCategories = async (req, res) => {
             }
 
             const updateData = {}
-            if (categoryName !== undefined) updateData.categoryName = categoryName.trim()
-            if (imagePath !== undefined) updateData.imagePath = imagePath
+            if (categoryName) updateData.categoryName = categoryName.trim()
+            if (imageUrl) updateData.image = imageUrl
 
             const updatedCategory = await  updateCategoryInDB(
                 id,

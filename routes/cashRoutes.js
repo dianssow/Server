@@ -1,7 +1,7 @@
 import express from "express"
 
 import {getCashSummary, getCashMovements, getCashShifts, openShift, closeShift, getDailyReport, createMovement} from "../controllers/cashController.js"
-import authMiddleware from "../middleware/authMiddleware.js"
+import authMiddleware from "../middleware/authmiddleware.js"
 
 const router = express.Router()
 
