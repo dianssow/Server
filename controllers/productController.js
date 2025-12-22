@@ -1,7 +1,6 @@
 import  { getCategoryById } from "../models/category.js"
 import  { addProductToDB, deleteProductFromDB, getAllProducts, getProductById, getProductByName,getProductsByCategoryFromDb, updateProductInDB, getFeaturedProductsFromDB } from"../models/product.js"
-import {ref, uploadBytes, getDownloadURL} from "firebase/storage" 
-import storage from "../serviceFirebase.js"
+
 const addProduct = async(req, res) => {
     try {
         
