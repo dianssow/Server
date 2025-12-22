@@ -7,31 +7,31 @@ const addProduct = async(req, res) => {
         const {name, stockCartons,piecesPerCarton, retailPrice,wholesalePrice, categoryId} = req.body 
 
 
-         if (!imageUrl || !name || !stockCartons  || !retailPrice || !wholesalePrice || !categoryId) {
-         return res.status(400).json({ success: false, message: "Tous les champs sont requis" })
-        }
-
-        if(Number(piecesPerCarton) <= 0){
-         return res.status(400).json({ success: false, message: "Le nombre de pieces par produit doit etre superieur a zéro" });
-            
-        }
-
-        const categoryExists = await getCategoryById(categoryId);
-       if (!categoryExists) {
-       return res.status(400).json({ success: false, message: "Catégorie invalide" });
-      }
-        
-        const existingProduct = await getProductByName (name)
-        if(existingProduct) {
-            return res.status(400).json({ success: false, message: `Produit existe dejà`})
-        }
-      if (req.file) {
+        if (req.file) {
             // Convertir le buffer de l'image en chaîne Base64
             const b64 = Buffer.from(req.file.buffer).toString('base64');
             // Créer une "Data URL" complète que le navigateur comprend
             let mimeType = req.file.mimetype; // ex: 'image/jpeg'
             imageUrl = `data:${mimeType};base64,${b64}`;
         }
+        if (!imageUrl || !name || !stockCartons  || !retailPrice || !wholesalePrice || !categoryId) {
+        return res.status(400).json({ success: false, message: "Tous les champs sont requis" })
+       }
+
+       if(Number(piecesPerCarton) <= 0){
+        return res.status(400).json({ success: false, message: "Le nombre de pieces par produit doit etre superieur a zéro" });
+           
+       }
+
+       const categoryExists = await getCategoryById(categoryId);
+      if (!categoryExists) {
+      return res.status(400).json({ success: false, message: "Catégorie invalide" });
+     }
+       
+       const existingProduct = await getProductByName (name)
+       if(existingProduct) {
+           return res.status(400).json({ success: false, message: `Produit existe dejà`})
+       }
         const newProductData =  ({
             image:imageUrl,
             name: name.trim(),

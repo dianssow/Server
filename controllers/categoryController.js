@@ -5,25 +5,25 @@ const addCategory = async(req, res) => {
         
         const {categoryName} = req.body 
         
-          if (!req.file) {
-            return res.status(400).json({ success: false, message: "L'image est requise" });
-            }
-
-            if (!categoryName  ) {
-            return res.status(400).json({ success: false, message: "Tous les champs sont requis" });
-        }
         
-        const existingCategory = await getCategoryByName(categoryName)
-        if(existingCategory) {
-            return res.status(400).json({ success: false, message: `Catégorie existe dejà`})
-        }
-
         let imageUrl = null;
         if (req.file) {
             const b64 = Buffer.from(req.file.buffer).toString('base64');
             const mimeType = req.file.mimetype; 
             imageUrl = `data:${mimeType};base64,${b64}`;
         }
+        if (!req.file) {
+          return res.status(400).json({ success: false, message: "L'image est requise" });
+          }
+
+          if (!categoryName  ) {
+          return res.status(400).json({ success: false, message: "Tous les champs sont requis" });
+      }
+      
+      const existingCategory = await getCategoryByName(categoryName)
+      if(existingCategory) {
+          return res.status(400).json({ success: false, message: `Catégorie existe dejà`})
+      }
 
         const categoryData = {
             image:imageUrl,
