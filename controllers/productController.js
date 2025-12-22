@@ -1,10 +1,12 @@
 import  { getCategoryById } from "../models/category.js"
 import  { addProductToDB, deleteProductFromDB, getAllProducts, getProductById, getProductByName,getProductsByCategoryFromDb, updateProductInDB, getFeaturedProductsFromDB } from"../models/product.js"
+import {ref, uploadBytes, getDownloadURL} from "firebase/storage" 
+import storage from "../serviceFirebase.js"
 const addProduct = async(req, res) => {
     try {
         
         const {name, stockCartons,piecesPerCarton, retailPrice,wholesalePrice, categoryId} = req.body 
-        const imagePath = req.file ? `uploads/${req.file.filename}`: null
+        // const imagePath = req.file ? `uploads/${req.file.filename}`: null
 
 
          if (!imagePath || !name || !stockCartons  || !retailPrice || !wholesalePrice || !categoryId) {
@@ -25,9 +27,14 @@ const addProduct = async(req, res) => {
         if(existingProduct) {
             return res.status(400).json({ success: false, message: `Produit existe dejà`})
         }
-
+    let imageUrl = null
+    if (req.file) {
+      const storageRef = ref(storage, `products/${Date.now()}-${req.file.originalname}`)
+      await uploadBytes(storageRef, req.file.buffer)
+      imageUrl = await getDownloadURL(storageRef)
+    }
         const newProductData =  ({
-            image:imagePath,
+            image:imageUrl,
             name: name.trim(),
             stockCartons: Number(stockCartons), 
             piecesPerCarton: Number(piecesPerCarton), 
@@ -181,9 +188,12 @@ const updateProduct = async(req, res) => {
         if (categoryId) updateProductData.categoryId = categoryId
 
 
-        if(req.file) {
-            updateProductData.image = `uploads/${req.file.filename}`
-        }
+        if (req.file) {
+      const storageRef = ref(storage, `products/${Date.now()}-${req.file.originalname}`)
+      await uploadBytes(storageRef, req.file.buffer)
+      const imageUrl = await getDownloadURL(storageRef)
+      updateProductData.image = imageUrl
+    }
 
         const newProduct = await updateProductInDB(
             id,

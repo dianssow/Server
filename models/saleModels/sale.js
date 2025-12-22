@@ -16,8 +16,11 @@ export const addSaleToDB = async (saleData) => {
   return sale
 }
 
-export const getAllSales = async () => {
-  const snapshot = await salesCollection.orderBy("createdAt", "desc").get()
+export const getAllSales = async ({limit = 200} = {}) => {
+  const snapshot = await salesCollection
+  .orderBy("createdAt", "desc")
+  .limit(limit)
+  .get()
   return snapshot.docs.map(doc => doc.data())
 }
 

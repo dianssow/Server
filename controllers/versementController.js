@@ -21,6 +21,9 @@ export const addVersement = async (req, res) => {
 
       const motifText = motif || null
 
+      const customerDoc = await db .collection("customers").doc(customerId).get()
+      const customerData = customerDoc.exists ? customerDoc.data() : null
+
     const versementNumber = `VRS-${Date.now()}`
 
     const newVersement = await addVersementToDB({
@@ -29,6 +32,8 @@ export const addVersement = async (req, res) => {
       amount,
       motif: motifText,
       customerId,
+      customerName: customerData?.name || null,
+      customerAddress: customerData?.address || null,
       userId,
       shiftId: shift.id
     })
@@ -71,7 +76,8 @@ export const addVersement = async (req, res) => {
 
 export const getVersements = async (req, res) => {
   try {
-    const versements = await getAllVersements()
+    const limit = parseInt(req.query.limit) || 50
+    const versements = await getAllVersements({limit})
     res.status(200).json({ success: true, versements })
   } catch (error) {
     console.error("Erreur lors de la récupération des versements:", error)

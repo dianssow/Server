@@ -58,6 +58,8 @@ const addSale = async (req, res) => {
       id: newSaleRef.id,
       invoiceNumber,
       customerId: customerId || null,
+      customerName: customerData?.name || null,
+      customerAddress: customerData?.address || null,
       items,
       paymentType,
       totalAmount,
@@ -93,35 +95,48 @@ const addSale = async (req, res) => {
   }
 }
 
+
 const getSales = async (req, res) => {
   try {
-    const snapshot = await salesCollection.orderBy("createdAt", "desc").get()
-    const sales = []
+    const limit = Math.min(
+      parseInt(req.query.limit, 10) || 200,
+      500 
+    )
     
-    const shiftsSnapshot = await db.collection("cashShifts").get()
-    const shiftsMap = {}
-    shiftsSnapshot.docs.forEach(doc => shiftsMap[doc.id] = doc.data())
+    const shiftId = req.query.shiftId
 
-    const customerIds = snapshot.docs.map(doc => doc.data().customerId).filter(Boolean)
-    const customerDocs = await Promise.all(customerIds.map(id => customersCollection.doc(id).get()))
-    const customersMap = {}
-    customerDocs.forEach(doc => { if (doc.exists) customersMap[doc.id] = doc.data() })
+    let query = salesCollection
+      .orderBy("createdAt", "desc")
+      .limit(limit)
 
-    for (const doc of snapshot.docs) {
-      const sale = doc.data()
-      sales.push({
-        ...sale,
-        customer: sale.customerId ? customersMap[sale.customerId] : null,
-        shift: sale.shiftId ? shiftsMap[sale.shiftId] || null : null,
-      })
+    if (shiftId) {
+      query = query.where("shiftId", "==", shiftId)
     }
 
-    return res.status(200).json({ success: true, sales })
+    const snapshot = await query.get()
+
+    const sales = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }))
+
+    return res.status(200).json({ 
+      success: true, 
+      sales,
+      hasMore: snapshot.docs.length === limit 
+    })
+
   } catch (error) {
     console.error("Erreur getSales:", error)
-    return res.status(500).json({ success: false, message: "Erreur serveur" })
+    return res.status(500).json({ 
+      success: false, 
+      message: "Erreur serveur" 
+    })
   }
 }
+
+
+
 
 const getCustomerSales = async (req, res) => {
   try {

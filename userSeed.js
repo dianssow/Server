@@ -6,7 +6,7 @@ const userSeed = async () => {
         const newUser = {
              name:     "admin",
              email:    "admin@gmail.com",
-             password:hashPassword,
+             password:  hashPassword,
              address:  "admin address",
              role:     "admin"
                 }

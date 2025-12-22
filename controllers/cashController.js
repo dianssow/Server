@@ -60,11 +60,11 @@ const createMovement = async (req, res) => {
     }
 
     const openShifts = await getCashShiftsByStatus("OPEN")
-    if (!openShifts || openShifts.length === 0) {
-      return res.status(400).json({ error: "Aucune session de caisse ouverte n'a été trouvée pour enregistrer le mouvement." })
-    }
+    if (!openShifts || openShifts.length === 0) {
+     return res.status(400).json({ error: "Aucune session de caisse ouverte n'a été trouvée pour enregistrer le mouvement." })
+     }
      const currentShift = openShifts[0]
-    const shiftId = currentShift.id
+     const shiftId = currentShift.id
 
     const movementRef = db.collection("cashMovements").doc()
     const movement = {

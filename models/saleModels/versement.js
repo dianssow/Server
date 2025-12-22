@@ -35,22 +35,25 @@ const addVersementToDB = async (data) => {
    }
 }
 
-const getAllVersements = async () => {
-  const snapshot = await versementsCollection.orderBy("createdAt", "desc").get()
+const getAllVersements = async ({limit = 50} = {}) => {
+  const snapshot = await versementsCollection
+  .orderBy("createdAt", "desc")
+  .limit(limit)
+  .get()
   
   return Promise.all(snapshot.docs.map(async (doc) => {
     const data = doc.data()
     
-    const customer = data.customerId ? await populateCustomer(data.customerId) : null
-    const user = data.userId ? await populateUser(data.userId) : null
-    const shift = data.shiftId ? await populateShift(data.shiftId) : null
+    // const customer = data.customerId ? await populateCustomer(data.customerId) : null
+    // const user = data.userId ? await populateUser(data.userId) : null
+    // const shift = data.shiftId ? await populateShift(data.shiftId) : null
     
     return { 
       id: doc.id, 
-      ...data, 
-      customerId: customer, 
-      userId: user,
-      shiftId: shift 
+      ...doc.data(), 
+      // customerId: customer, 
+      // userId: user,
+      // shiftId: shift 
     }
   }))
 }

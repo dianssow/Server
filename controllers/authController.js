@@ -16,7 +16,7 @@ const login = async (req, res) => {
         if(!isMatch) {
             return res.status(401).json({success:false, message: "Données invalides"})
         }
-        const token = jwt.sign({id: user.id, role: user.role}, process.env.JWT_SECRET, {expiresIn: '12h'})
+        const token = jwt.sign({id: user.id, role: user.role}, process.env.JWT_SECRET, {expiresIn: '18h'})
 
         return res.status(200).json ({success:true, message:"Utilisateur Connecté", token, user: {id: user.id, name: user.name, email: user.email, role: user.role}})
     }

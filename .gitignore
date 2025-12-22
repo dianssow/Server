@@ -17,4 +17,4 @@ build
 
 #Security
 .env
-config\gap-distribution-firebase-adminsdk.json 
+config/gap-distribution-firebase-adminsdk.json 
