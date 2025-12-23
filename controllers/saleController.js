@@ -9,6 +9,7 @@ import { populateUser, populateCustomer } from "../models/cashModels/cashShift.j
 const salesCollection = db.collection("sales")
 const cashMovementsCollection = db.collection("cashMovements")
 const customersCollection = db.collection("customers")
+const shiftsCollection = db.collection("cashShifts")
 const addSale = async (req, res) => {
   try {
     const { customerId, items, paymentType, totalAmount, givenAmount, reste } = req.body
@@ -30,7 +31,7 @@ const addSale = async (req, res) => {
     const openShifts = await getCashShiftsByStatus("OPEN")
     if (!openShifts || openShifts.length === 0)
       return res.status(400).json({ success: false, message: "Aucune session ouverte" })
-    const shift = openShifts[0]
+    const CurrentShift = openShifts[0]
 
     for(const item of items) {
       try {
@@ -66,7 +67,12 @@ const addSale = async (req, res) => {
       givenAmount,
       reste,
       userId,
-      shiftId: shift.id,
+      shiftId: CurrentShift.id,
+      shiftSnapshot: { 
+          id: currentShift.id, 
+          status: currentShift.status,
+          openedAt: currentShift.openedAt 
+      }, 
       createdAt: new Date().toISOString(),
     }
     await newSaleRef.set(newSale)
@@ -115,11 +121,41 @@ const getSales = async (req, res) => {
 
     const snapshot = await query.get()
 
-    const sales = snapshot.docs.map(doc => ({
+    const salesRaw = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }))
 
+     const uniqueShiftIds = [...new Set(salesRaw.map(s => s.shiftId).filter(id => id))];
+      const shiftsData = {}
+       if (uniqueShiftIds.length > 0) {
+        // Astuce : Promise.all pour charger les quelques sessions nécessaires en parallèle
+        const shiftDocs = await Promise.all(
+            uniqueShiftIds.map(id => shiftsCollection.doc(id).get())
+        );
+        
+        shiftDocs.forEach(doc => {
+            if (doc.exists) {
+                shiftsData[doc.id] = { id: doc.id, ...doc.data() };
+            }
+        });
+    }
+
+    // 3. On assemble le tout pour le Frontend
+    const sales = salesRaw.map(sale => {
+        // On cherche le shift complet correspondant à l'ID
+        const fullShift = shiftsData[sale.shiftId] || null;
+        
+        return {
+            ...sale,
+            shift: fullShift, // Maintenant sale.shift est un objet complet ! (avec .status)
+            customer: { // Petit bonus pour que ton frontend affiche le nom du client s'il est stocké à plat
+                id: sale.customerId,
+                name: sale.customerName,
+                address: sale.customerAddress
+            }
+        };
+    });
     return res.status(200).json({ 
       success: true, 
       sales,
