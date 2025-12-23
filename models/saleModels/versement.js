@@ -35,28 +35,49 @@ const addVersementToDB = async (data) => {
    }
 }
 
-const getAllVersements = async ({limit = 50} = {}) => {
+const getAllVersements = async ({ limit = 50 } = {}) => {
   const snapshot = await versementsCollection
-  .orderBy("createdAt", "desc")
-  .limit(limit)
-  .get()
+    .orderBy("createdAt", "desc")
+    .limit(limit)
+    .get()
   
-  return Promise.all(snapshot.docs.map(async (doc) => {
-    const data = doc.data()
-    
-    // const customer = data.customerId ? await populateCustomer(data.customerId) : null
-    // const user = data.userId ? await populateUser(data.userId) : null
-    // const shift = data.shiftId ? await populateShift(data.shiftId) : null
-    
-    return { 
-      id: doc.id, 
-      ...doc.data(), 
-      // customerId: customer, 
-      // userId: user,
-      // shiftId: shift 
-    }
+  const versementsRaw = snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data(),
+  }))
+
+  // IDs uniques
+  const customerIds = [...new Set(versementsRaw.map(v => v.customerId).filter(Boolean))]
+  const userIds =     [...new Set(versementsRaw.map(v => v.userId).filter(Boolean))]
+  const shiftIds =    [...new Set(versementsRaw.map(v => v.shiftId).filter(Boolean))]
+
+  // Chargement en parallèle
+  const customersMap = {}
+  for (const cid of customerIds) {
+    const c = await populateCustomer(cid)
+    if (c) customersMap[cid] = c
+  }
+
+  const usersMap = {}
+  for (const uid of userIds) {
+    const u = await populateUser(uid)
+    if (u) usersMap[uid] = u
+  }
+
+  const shiftsMap = {}
+  for (const sid of shiftIds) {
+    const s = await populateShift(sid)
+    if (s) shiftsMap[sid] = s
+  }
+
+  return versementsRaw.map(v => ({
+    ...v,
+    customer: customersMap[v.customerId] || null,
+    user: usersMap[v.userId] || null,
+    shift: shiftsMap[v.shiftId] || null,
   }))
 }
+
 
 
 
