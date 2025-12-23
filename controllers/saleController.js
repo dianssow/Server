@@ -31,7 +31,7 @@ const addSale = async (req, res) => {
     const openShifts = await getCashShiftsByStatus("OPEN")
     if (!openShifts || openShifts.length === 0)
       return res.status(400).json({ success: false, message: "Aucune session ouverte" })
-    const CurrentShift = openShifts[0]
+    const currentShift = openShifts[0]
 
     for(const item of items) {
       try {
@@ -67,7 +67,7 @@ const addSale = async (req, res) => {
       givenAmount,
       reste,
       userId,
-      shiftId: CurrentShift.id,
+      shiftId: currentShift.id,
       shiftSnapshot: { 
           id: currentShift.id, 
           status: currentShift.status,
@@ -87,7 +87,7 @@ const addSale = async (req, res) => {
       amount: Math.abs(encaissementReel),
       userId,
       customerId: customerId || null,
-      shiftId: shift.id,
+      shiftId: currentShift.id,
       reason: `Facture n°${invoiceNumber}`,
       relatedSaleId: newSaleRef.id,
       createdAt: new Date().toISOString(),
@@ -229,7 +229,7 @@ const deleteSale = async (req, res) => {
     const openShifts = await getCashShiftsByStatus("OPEN")
 
     if (openShifts.length > 0) {
-      const shift = openShifts[0]                                                                    
+      const currentShift = openShifts[0]                                                                    
       const correctionRef = cashMovementsCollection.doc()                               
       await correctionRef.set({
         id: correctionRef.id,
@@ -237,7 +237,7 @@ const deleteSale = async (req, res) => {
         method: "Retour",     
         amount: sale.totalAmount,
         userId: req.user.id,
-        shiftId: shift.id,     
+        shiftId: currentShift.id,     
         reason: `Annulation de la Vente ${sale.invoiceNumber}`,
         relatedSaleId: sale.id,
         createdAt: new Date().toISOString(),
