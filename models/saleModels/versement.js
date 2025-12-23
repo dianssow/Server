@@ -30,15 +30,18 @@ const populateUserLocal = async (userId) => {
 };
 
 const addVersementToDB = async (data) => {
-  const docRef = await versementsCollection.add({
+  const versementRef = versementsCollection.doc()
+
+  const versement = {
+    id: versementRef.id,
     ...data,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-  })
-  const doc = await docRef.get()
-  const result = {id: doc.id, ...doc.data()}
+  }
+
+ await versementRef.set(versement)
   return { 
-    ...result,
+    ...versement,
     createdAt: normalizeDate(result.createdAt),
     updatedAt: normalizeDate(result.updatedAt)
    }
@@ -138,7 +141,7 @@ const populateShift = async (shiftId) => {
   if(!shift) return null
 
   const user = await populateUserLocal(shift.userId)
-  return{ ...shift, userId: user}
+  return{ ...shift, user}
 }
 
 export {
