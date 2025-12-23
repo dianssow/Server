@@ -1,5 +1,4 @@
 import { db } from "../../firebase.js"
-import { getCashShiftById , populateUser} from "../cashModels/cashShift.js"
 
 const versementsCollection = db.collection("versements")
 
@@ -13,12 +12,22 @@ const normalizeDate = (dateField) => {
     return dateField;
 }
 
+const getCashShiftByIdLocal = async (id) => {
+    const doc = await db.collection("cashShifts").doc(id).get();
+    return doc.exists ? { id: doc.id, ...doc.data() } : null;
+};
+
 const populateCustomer = async (customerId) => {
   if (!customerId) return null
   const doc = await db.collection("customers").doc(customerId).get()
   if (!doc.exists) return null
   return { id: doc.id, name: doc.data().name, address: doc.data().address }
 }
+const populateUserLocal = async (userId) => {
+    if (!userId) return null;
+    const doc = await db.collection("users").doc(userId).get();
+    return doc.exists ? { id: doc.id, name: doc.data().name } : null;
+};
 
 const addVersementToDB = async (data) => {
   const docRef = await versementsCollection.add({
@@ -60,7 +69,7 @@ const getAllVersements = async ({ limit = 50 } = {}) => {
 
   const usersMap = {}
   for (const uid of userIds) {
-    const u = await populateUser(uid)
+    const u = await populateUserLocal(uid)
     if (u) usersMap[uid] = u
   }
 
@@ -125,10 +134,10 @@ const deleteVersementFromDB = async (id) => {
 
 const populateShift = async (shiftId) => {
   if (!shiftId) return null 
-  const shift = await getCashShiftById(shiftId)
+  const shift = await getCashShiftByIdLocal(shiftId)
   if(!shift) return null
 
-  const user = await populateUser(shift.userId)
+  const user = await populateUserLocal(shift.userId)
   return{ ...shift, userId: user}
 }
 
