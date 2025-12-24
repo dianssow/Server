@@ -42,8 +42,8 @@ const addVersementToDB = async (data) => {
  await versementRef.set(versement)
   return { 
     ...versement,
-    createdAt: normalizeDate(result.createdAt),
-    updatedAt: normalizeDate(result.updatedAt)
+    createdAt: normalizeDate(versement.createdAt),
+    updatedAt: normalizeDate(versement.updatedAt)
    }
 }
 
