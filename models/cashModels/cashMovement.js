@@ -3,13 +3,15 @@ import { db } from "../../firebase.js"
 const cashMovementsCollection = db.collection("cashMovements")
 
 const addCashMovementToDB = async (data) => {
-  const docRef = await cashMovementsCollection.add({
+  const docRef =  cashMovementsCollection.doc ()
+  const movement = {
+    id: docRef.id,
     ...data,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-  })
-  const doc = await docRef.get()
-  return { id: doc.id, ...doc.data() }
+  }
+  await docRef.set(movement)
+  return movement
 }
 
 const getAllCashMovements = async () => {

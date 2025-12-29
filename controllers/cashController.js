@@ -24,16 +24,16 @@ const getCashSummary = async (req, res) => {
 
     const encaissements = movements
       .filter(m => m.type === "ENC")
-      .reduce((sum, m) => sum + (m.amount || 0), 0)
+      .reduce((sum, m) => sum + Number(m.amount || 0), 0)
     
     const decaissements = movements
       .filter(m => m.type === "DEC")
       .reduce((sum, m) => {
-        if (m.method === "Retour") return sum + Math.abs(m.amount || 0)
-        return sum + (m.amount || 0)
+        if (m.method === "Retour") return sum + Math.abs(Number(m.amount) || 0)
+        return sum + Number(m.amount || 0)
       }, 0)
 
-    const balance = (shift.openingAmount || 0) + encaissements - decaissements
+    const balance = Number(shift.openingAmount || 0) + encaissements - decaissements
     const user = await populateUser(shift.userId)
 
     res.json({
@@ -168,16 +168,16 @@ const closeShift = async (req, res) => {
 
     const totalEnc = movements
       .filter(m => m.type === "ENC")
-      .reduce((sum, m) => sum + (m.amount || 0), 0)
+      .reduce((sum, m) => sum + Number(m.amount || 0), 0)
     
     const totalDec = movements
       .filter(m => m.type === "DEC")
       .reduce((sum, m) => {
-        if (m.method === "Retour") return sum + Math.abs(m.amount || 0)
-        return sum + (m.amount || 0)
+        if (m.method === "Retour") return sum + Math.abs(Number(m.amount) || 0)
+        return sum + Number(m.amount || 0)
       }, 0)
 
-    const soldeTheorique = (shift.openingAmount || 0) + totalEnc - totalDec
+    const soldeTheorique = Number(shift.openingAmount || 0) + totalEnc - totalDec
     const ecart = closingAmount - soldeTheorique
 
     const updatedShift = await updateCashShiftInDB(shift.id, {
@@ -231,17 +231,17 @@ const getDailyReport = async (req, res) => {
         const sale = m.relatedSaleId
         if (m.type === "ENC") {
           if (m.method === "Versement") {
-            totalVersement += m.amount || 0
+            totalVersement += Number(m.amount) || 0
           } else if (sale && sale.paymentType) {
-            if (sale.paymentType === "Espèces") totalEspeces += sale.totalAmount || 0
-            else if (sale.paymentType === "Crédit") totalCredit += sale.givenAmount || 0
-            else if (sale.paymentType === "Chèque") totalCheque += sale.givenAmount || 0
+            if (sale.paymentType === "Espèces") totalEspeces += Number(sale.totalAmount) || 0
+            else if (sale.paymentType === "Crédit") totalCredit += Number(sale.givenAmount) || 0
+            else if (sale.paymentType === "Chèque") totalCheque += Number(sale.givenAmount) || 0
           }
         }
         if (m.type === "DEC") {
-          if (sale && sale.paymentType === "Retour") totalRetour += sale.totalAmount || 0
+          if (sale && sale.paymentType === "Retour") totalRetour += Number(sale.totalAmount) || 0
         }
-      })
+      }) 
 
       const totalEnc = totalEspeces + totalCredit + totalCheque + totalVersement
       const totalDec = populatedMovements
@@ -251,7 +251,6 @@ const getDailyReport = async (req, res) => {
           return sum + (m.amount || 0)
         }, 0)
 
-      // FIXED: Calculate soldeTheorique BEFORE using it in return
       const soldeTheorique = (shift.openingAmount || 0) + totalEnc - totalDec
       const cashier = await populateUser(shift.userId)
 
@@ -268,7 +267,7 @@ const getDailyReport = async (req, res) => {
         totalRetour,
         totalEncaissements: totalEnc,
         totalDecaissements: totalDec,
-        soldeTheorique,  // Now properly defined
+        soldeTheorique,  
         soldeReel: shift.closingAmount || 0,
         ecart: shift.ecart || 0,
         movements: populatedMovements
