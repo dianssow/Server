@@ -10,6 +10,19 @@ const salesCollection = db.collection("sales")
 const cashMovementsCollection = db.collection("cashMovements")
 const customersCollection = db.collection("customers")
 const shiftsCollection = db.collection("cashShifts")
+
+const calculateCashImpact = (sale) => {
+   if (sale.paymentType === "Espèces" || sale.paymentType === "Retour") {
+        return Number(sale.totalAmount)
+}
+
+ if (sale.paymentType === "Crédit" || sale.paymentType === "Chèque") {
+        return Number(sale.givenAmount || 0);
+    }
+
+    // Par sécurité, retour par défaut
+    return Number(sale.totalAmount);
+  }
 const addSale = async (req, res) => {
   try {
     const { customerId, items, paymentType, totalAmount, givenAmount, reste } = req.body
@@ -88,7 +101,7 @@ const addSale = async (req, res) => {
       userId,
       customerId: customerId || null,
       shiftId: currentShift.id,
-      reason: `Facture n°${invoiceNumber}`,
+      reason: `Facture n°${invoiceNumber}` , 
       relatedSaleId: newSaleRef.id,
       createdAt: new Date().toISOString(),
     })
@@ -129,7 +142,7 @@ const getSales = async (req, res) => {
      const uniqueShiftIds = [...new Set(salesRaw.map(s => s.shiftId).filter(id => id))];
       const shiftsData = {}
        if (uniqueShiftIds.length > 0) {
-        // Astuce : Promise.all pour charger les quelques sessions nécessaires en parallèle
+        //  Promise.all pour charger les quelques sessions nécessaires en parallèle
         const shiftDocs = await Promise.all(
             uniqueShiftIds.map(id => shiftsCollection.doc(id).get())
         );
@@ -141,15 +154,15 @@ const getSales = async (req, res) => {
         });
     }
 
-    // 3. On assemble le tout pour le Frontend
+    
     const sales = salesRaw.map(sale => {
-        // On cherche le shift complet correspondant à l'ID
+        
         const fullShift = shiftsData[sale.shiftId] || null;
         
         return {
             ...sale,
-            shift: fullShift, // Maintenant sale.shift est un objet complet ! (avec .status)
-            customer: { // Petit bonus pour que ton frontend affiche le nom du client s'il est stocké à plat
+            shift: fullShift,
+            customer: { 
                 id: sale.customerId,
                 name: sale.customerName,
                 address: sale.customerAddress
@@ -204,6 +217,76 @@ const getCustomerSales = async (req, res) => {
   }
 }
 
+const editSale = async (req, res) => {
+  try {
+    const { id } = req.params
+    const userId = req.user?.id
+
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Utilisateur non authentifié" })
+    }
+
+    // Récupérer la facture
+    const saleDoc = await salesCollection.doc(id).get()
+    if (!saleDoc.exists) {
+      return res.status(404).json({ success: false, message: "Vente introuvable" })
+    }
+
+    const sale = saleDoc.data()
+
+    // Restaurer le stock
+    for (const item of sale.items) {
+      try {
+        await updateStockOnTransaction(
+          item.productId,
+          item.quantity,
+          item.unit,
+          true 
+        )
+      } catch (error) {
+        console.error(`Erreur restauration stock pour ${item.productId}:`, error.message)
+      }
+    }
+
+    // Créer un mouvement de correction
+    const openShifts = await getCashShiftsByStatus("OPEN")
+
+    if (openShifts.length > 0) {
+      const currentShift = openShifts[0]
+      
+      // --- CORRECTION ICI : UTILISER LA FONCTION ---
+      const realAmountToDeduct = calculateCashImpact(sale); 
+
+      // On n'enregistre le mouvement que s'il y a un impact financier (> 0)
+      if (realAmountToDeduct > 0) {
+          const correctionRef = cashMovementsCollection.doc()
+          await correctionRef.set({
+            id: correctionRef.id,
+            type: "DEC",
+            method: "Correction",
+            amount: realAmountToDeduct, // Utilisation du montant calculé
+            userId,
+            shiftId: currentShift.id,
+            reason: `Modification facture ${sale.invoiceNumber}`,
+            relatedSaleId: sale.id,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          })
+      }
+    }
+
+    // Supprimer la facture
+    await salesCollection.doc(id).delete()
+
+    return res.status(200).json({ success: true, message: "Facture annulée pour modification", sale })
+
+  } catch (error) {
+    console.error("Erreur modification vente:", error)
+    return res.status(500).json({ success: false, message: "Erreur serveur" })
+  }
+}
+
+
 const deleteSale = async (req, res) => {
   try {
     if (req.user.role !== "admin")
@@ -217,32 +300,35 @@ const deleteSale = async (req, res) => {
     const sale = saleDoc.data()
 
     for(const item of sale.items) {
-      const stockUpdateResult = await updateStockOnTransaction( item.productId,
-      item.quantity,
-      item.unit,
-      true)
+      const stockUpdateResult = await updateStockOnTransaction( item.productId, item.quantity, item.unit, true)
       if(!stockUpdateResult.success){
-        console.error(`Erreur lors de la mise à jour de stock pour le produit ${item.productId}: ${stockUpdateResult.message}`)
+        console.error(`Erreur stock: ${stockUpdateResult.message}`)
       }
     }
 
     const openShifts = await getCashShiftsByStatus("OPEN")
 
     if (openShifts.length > 0) {
-      const currentShift = openShifts[0]                                                                    
-      const correctionRef = cashMovementsCollection.doc()                               
-      await correctionRef.set({
-        id: correctionRef.id,
-        type: "DEC",
-        method: "Retour",     
-        amount: sale.totalAmount,
-        userId: req.user.id,
-        shiftId: currentShift.id,     
-        reason: `Annulation de la Vente ${sale.invoiceNumber}`,
-        relatedSaleId: sale.id,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      })
+      const currentShift = openShifts[0]       
+      
+      // --- CORRECTION ICI : UTILISER LA FONCTION ---
+      const realAmountToDeduct = calculateCashImpact(sale);
+      
+      if (realAmountToDeduct > 0) {
+          const correctionRef = cashMovementsCollection.doc()                               
+          await correctionRef.set({
+            id: correctionRef.id,
+            type: "DEC",
+            method: "Retour",     
+            amount: realAmountToDeduct, // Utilisation du montant calculé
+            userId: req.user.id,
+            shiftId: currentShift.id,     
+            reason: `Annulation de la Vente ${sale.invoiceNumber}`,
+            relatedSaleId: sale.id,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          })
+      }
     }
 
     await salesCollection.doc(id).delete()
@@ -253,4 +339,4 @@ const deleteSale = async (req, res) => {
   }
 }
 
-export { addSale, getSales, getCustomerSales, deleteSale }
+export { addSale, getSales, getCustomerSales, editSale, deleteSale }

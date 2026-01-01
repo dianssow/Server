@@ -50,23 +50,7 @@ app.use(
 )
 
 
-// app.use(
-//     cors({
-//      origin: (origin, callback) => {
-//         if(!origin) return callback(null, true)
-//          if(origin && allowedOrigins.includes(origin)) {
-//              return callback(null, true)
-//          }
 
-
-
-//          else {
-//             callback(new Error("Non autorisé par CORS"))
-//         }
-//      },
-//       credentials: true,
-//     })
-// )
 app.use(express.json())
 app.use('/api/auth', authRoutes)
 app.use('/api/category', categoryRoutes)
