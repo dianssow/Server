@@ -45,7 +45,7 @@ export const addVersement = async (req, res) => {
       versementNumber,
       method: method || "Versement",
       amount,
-      motif: motifText,
+      motif: motifText, 
       customerId,
       customerName: customerData?.name || null,
       customerAddress: customerData?.address || null,
