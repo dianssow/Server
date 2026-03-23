@@ -8,7 +8,8 @@ const customersCollection = db.collection("customers")
 export const addSaleToDB = async (saleData) => {
   const saleRef = salesCollection.doc()
   const sale = {
-     id: saleRef.id, ...saleData, 
+     id: saleRef.id,
+    ...saleData, 
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
    }

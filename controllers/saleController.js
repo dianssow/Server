@@ -254,17 +254,16 @@ const editSale = async (req, res) => {
     if (openShifts.length > 0) {
       const currentShift = openShifts[0]
       
-      // --- CORRECTION ICI : UTILISER LA FONCTION ---
       const realAmountToDeduct = calculateCashImpact(sale); 
 
-      // On n'enregistre le mouvement que s'il y a un impact financier (> 0)
+      // On n'enregistre le mouvement que s'il y a un impact financier > 0
       if (realAmountToDeduct > 0) {
           const correctionRef = cashMovementsCollection.doc()
           await correctionRef.set({
             id: correctionRef.id,
             type: "DEC",
             method: "Correction",
-            amount: realAmountToDeduct, // Utilisation du montant calculé
+            amount: realAmountToDeduct, 
             userId,
             shiftId: currentShift.id,
             reason: `Modification facture ${sale.invoiceNumber}`,
@@ -311,7 +310,7 @@ const deleteSale = async (req, res) => {
     if (openShifts.length > 0) {
       const currentShift = openShifts[0]       
       
-      // --- CORRECTION ICI : UTILISER LA FONCTION ---
+   
       const realAmountToDeduct = calculateCashImpact(sale);
       
       if (realAmountToDeduct > 0) {
@@ -320,7 +319,7 @@ const deleteSale = async (req, res) => {
             id: correctionRef.id,
             type: "DEC",
             method: "Retour",     
-            amount: realAmountToDeduct, // Utilisation du montant calculé
+            amount: realAmountToDeduct, 
             userId: req.user.id,
             shiftId: currentShift.id,     
             reason: `Annulation de la Vente ${sale.invoiceNumber}`,

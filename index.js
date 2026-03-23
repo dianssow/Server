@@ -8,6 +8,7 @@ import userRoutes from './routes/user.js'
 import saleRoutes from './routes/sale.js'
 import cashRoutes from './routes/cashRoutes.js'
 import versementRoutes from './routes/versement.js'
+import supplierRoutes from './routes/supplier.js'
 import dotenv from "dotenv"
 import path from "path"  
 
@@ -60,6 +61,7 @@ app.use('/api/user', userRoutes)
 app.use('/api/sale', saleRoutes)
 app.use('/api/cash', cashRoutes)
 app.use('/api/versement', versementRoutes)
+app.use('/api/supplier', supplierRoutes)
 app.use('/uploads', express.static(path.join(process.cwd(),"uploads")))
 const PORT = process.env.PORT || 3000
 
