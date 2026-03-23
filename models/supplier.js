@@ -161,11 +161,17 @@ const getAllSuppliersWithBalance = async () => {
 
 
 const updateInvoice = async (supplierId, invoiceId, data) => {
+  const cleanData = Object.fromEntries(
+    Object.entries(data).map(([key, value]) => [
+      key,
+      value ?? ""
+    ])
+  )
   await supplierCollection
     .doc(supplierId)
     .collection("invoices")
     .doc(invoiceId)
-    .update({ ...data, updatedAt: new Date().toISOString() })
+    .update({ ...cleanData, updatedAt: new Date().toISOString() })
   const doc = await supplierCollection.doc(supplierId).collection("invoices").doc(invoiceId).get()
   return { id: doc.id, ...doc.data() }
 }
@@ -175,11 +181,17 @@ const deleteInvoice = async (supplierId, invoiceId) => {
 }
 
 const updateVersement = async (supplierId, versementId, data) => {
+  const cleanData = Object.fromEntries(
+    Object.entries(data).map(([key, value]) => [
+      key,
+      value  ?? ""
+    ])
+  )
   await supplierCollection
     .doc(supplierId)
     .collection("versements")
     .doc(versementId)
-    .update({ ...data, updatedAt: new Date().toISOString() })
+    .update({ ...cleanData, updatedAt: new Date().toISOString() })
   const doc = await supplierCollection.doc(supplierId).collection("versements").doc(versementId).get()
   return { id: doc.id, ...doc.data() }
 }

@@ -266,6 +266,7 @@ const getSupplierVersements = async(req, res) => {
 
 const getBalance = async(req, res) => {
   try {
+
     const { supplierId } = req.params
     
     const balanceData = await getSupplierBalance(supplierId)
@@ -315,14 +316,14 @@ const removeInvoice = async (req, res) => {
 const editVersement = async (req, res) => {
   try {
     const { supplierId, versementId } = req.params
-    const { versementAmount, versementDate, payerName, motif } = req.body
-
+    const { versementAmount, versementDate, payerName, motif, versementType } = req.body
+   
     const updated = await updateVersement(supplierId, versementId, {
-      versementAmount: Number(versementAmount),
+     versementAmount: isNaN(Number(versementAmount)) ? 0 : Number(versementAmount),
       versementDate,
-      payerName: payerName || null,
-      motif: motif || null,
-      versementType: versementType || null
+      payerName: payerName || "",
+      motif: motif || "",
+      versementType: versementType || ""
     })
 
     return res.status(200).json({ success: true, versement: updated })

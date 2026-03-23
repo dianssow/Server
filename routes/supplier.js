@@ -14,6 +14,6 @@ router.get('/:supplierId/versements', authMiddleware, getSupplierVersements)
 router.get('/:supplierId/balance', authMiddleware, getBalance)
 router.put("/:supplierId/invoice/:invoiceId", authMiddleware, editInvoice)
 router.delete("/:supplierId/invoice/:invoiceId", authMiddleware, removeInvoice)
-router.put("/:supplierId/versement/:versementId", authMiddleware, editVersement)
+router.put("/:supplierId/versement/:versementId",  editVersement)
 router.delete("/:supplierId/versement/:versementId", authMiddleware, removeVersement)
 export default router  
