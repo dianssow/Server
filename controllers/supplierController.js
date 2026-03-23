@@ -321,7 +321,7 @@ const editVersement = async (req, res) => {
       versementAmount: Number(versementAmount),
       versementDate,
       payerName: payerName || null,
-      motif: motif || null
+      motif: motif || null,
       versementType: versementType || null
     })
 
