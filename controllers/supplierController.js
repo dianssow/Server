@@ -345,5 +345,5 @@ const removeVersement = async (req, res) => {
 }
 
 export {
-  addSupplier, getSuppliers, updateSupplier, deleteSupplier,addSupplierInvoice, getSupplierInvoices, addSupplierVersement,getSupplierVersements,getBalance,  editInvoice, removeInvoice, editVersement, removeVersement
+  addSupplier, getSuppliers, updateSupplier, deleteSupplier,addSupplierInvoice, getSupplierInvoices, addSupplierVersement,getSupplierVersements,getBalance,  editInvoice, removeInvoice, editVersement, removeVersement 
 }

@@ -224,7 +224,7 @@ const getDailyReport = async (req, res) => {
       let totalEspeces = 0
       let totalCredit = 0
       let totalCheque = 0
-      let totalVersement = 0
+      let totalVersement = 0 
       let totalRetour = 0
 
       populatedMovements.forEach(m => {

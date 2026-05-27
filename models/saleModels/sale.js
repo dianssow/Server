@@ -27,7 +27,7 @@ export const getAllSales = async ({limit = 200} = {}) => {
 
 export const getSalesByCustomer = async (customerId) => {
   const snapshot = await salesCollection.where("customerId", "==", customerId).orderBy("createdAt", "desc").get()
-  return snapshot.docs.map(doc => doc.data())
+  return snapshot.docs.map(doc => ({ id: doc.id ,...doc.data()}))
 }
 
 export const getSaleById = async (id) => {

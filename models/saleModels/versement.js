@@ -119,7 +119,7 @@ const getVersementsByCustomer = async (customerId) => {
     .where("customerId", "==", customerId)
     .orderBy("createdAt", "desc")
     .get()
-  return snapshot.docs.map(doc => doc.data())
+  return snapshot.docs.map(doc => ({ id: doc.id ,...doc.data()}))
 }
 
 const updateVersementInDB = async (id, data) => {

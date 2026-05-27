@@ -204,7 +204,6 @@ const getCustomerSales = async (req, res) => {
       const sale = doc.data()
       sales.push({
         ...sale,
-         createdAt: new Date().toISOString(),
         customer: customerData,
         shift: sale.shiftId ? shiftsMap[sale.shiftId] || null : null,
       })
