@@ -5,6 +5,7 @@ import { cert, getApps, initializeApp } from "firebase-admin/app"
 import { getFirestore, FieldValue, Timestamp } from "firebase-admin/firestore"
 import { getStorage } from "firebase-admin/storage"
 
+
 const serviceAccount = {
   type: process.env.FIREBASE_TYPE,
   projectId: process.env.FIREBASE_PROJECT_ID,
@@ -18,6 +19,14 @@ const serviceAccount = {
   clientC509CertUrl: process.env.FIREBASE_CLIENT_X,
   universeDomain: process.env.FIREBASE_UNIVERSEDOMAIN,
 }
+
+
+console.log("DEBUG FIREBASE CONFIG:", {
+  projectId: serviceAccount.projectId,
+  clientEmail: serviceAccount.clientEmail,
+  hasKey: !!serviceAccount.privateKey,
+  certUrl: serviceAccount.clientC509CertUrl // Vérifiez si c'est bien défini !
+});
 
 const app = getApps().length
   ? getApps()[0]
