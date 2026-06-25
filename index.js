@@ -16,12 +16,6 @@ import { db } from './firebase.js'
 dotenv.config()
 console.log("allowedOrigins:", process.env.CAISSE, process.env.BACKOFFICE)
 
-console.log("=== FIREBASE DEBUG ===");
-console.log("PROJECT_ID:", process.env.FIREBASE_PROJECT_ID);
-console.log("CLIENT_EMAIL:", process.env.FIREBASE_CLIENT_EMAIL);
-console.log("PRIVATE_KEY exists:", !!process.env.FIREBASE_PRIVATE_KEY);
-console.log("PRIVATE_KEY_ID:", process.env.FIREBASE_PRIVATE_KEY_ID);
-console.log("======================");
 
 const allowedOrigins = [
     process.env.CAISSE || 'https://gap-caisse.web.app',
@@ -108,6 +102,24 @@ app.get("/debug-admin", async (req, res) => {
     })
   }
 })
+
+app.get("/debug-token", async (req, res) => {
+  try {
+    const token =
+      await admin.app().options.credential.getAccessToken();
+
+    res.json({
+      success: true,
+      tokenType: typeof token
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+      code: error.code
+    });
+  }
+});
 app.listen(PORT, () => {
     console.log(`le serveur est lancé sur le http://localhost:${PORT} `)
     
