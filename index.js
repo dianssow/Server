@@ -16,7 +16,12 @@ import { db } from './firebase.js'
 dotenv.config()
 console.log("allowedOrigins:", process.env.CAISSE, process.env.BACKOFFICE)
 
-
+console.log("=== FIREBASE DEBUG ===");
+console.log("PROJECT_ID:", process.env.FIREBASE_PROJECT_ID);
+console.log("CLIENT_EMAIL:", process.env.FIREBASE_CLIENT_EMAIL);
+console.log("PRIVATE_KEY exists:", !!process.env.FIREBASE_PRIVATE_KEY);
+console.log("PRIVATE_KEY_ID:", process.env.FIREBASE_PRIVATE_KEY_ID);
+console.log("======================");
 
 const allowedOrigins = [
     process.env.CAISSE || 'https://gap-caisse.web.app',
