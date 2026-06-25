@@ -122,6 +122,29 @@ app.get("/debug-token", async (req, res) => {
     });
   }
 });
+
+app.get("/debug-firestore", async (req, res) => {
+  try {
+    const collections = await db.listCollections();
+
+    res.json({
+      success: true,
+      collections: collections.map(c => c.id)
+    });
+
+  } catch (error) {
+    console.error("Firestore test:", error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+      code: error.code,
+      details: error.details
+    });
+  }
+});
+
+
 app.listen(PORT, () => {
     console.log(`le serveur est lancé sur le http://localhost:${PORT} `)
     
