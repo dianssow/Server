@@ -153,6 +153,27 @@ app.get("/debug-project", (req, res) => {
   })
 })
 
+app.get("/debug-firestore2", async (req, res) => {
+  try {
+    const doc = await db.collection("stores").limit(1).get()
+
+    res.json({
+      success: true,
+      size: doc.size
+    })
+  } catch (e) {
+    console.error(e)
+
+    res.status(500).json({
+      success: false,
+      message: e.message,
+      code: e.code,
+      stack: e.stack
+    })
+  }
+})
+
+
 app.listen(PORT, () => {
     console.log(`le serveur est lancé sur le http://localhost:${PORT} `)
     
