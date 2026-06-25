@@ -11,9 +11,12 @@ import versementRoutes from './routes/versement.js'
 import supplierRoutes from './routes/supplier.js'
 import dotenv from "dotenv"
 import path from "path"  
+import { db } from './firebase.js'
 
 dotenv.config()
 console.log("allowedOrigins:", process.env.CAISSE, process.env.BACKOFFICE)
+
+
 
 const allowedOrigins = [
     process.env.CAISSE || 'https://gap-caisse.web.app',
@@ -65,6 +68,41 @@ app.use('/api/supplier', supplierRoutes)
 app.use('/uploads', express.static(path.join(process.cwd(),"uploads")))
 const PORT = process.env.PORT || 3000
 
+app.get("/debug-admin", async (req, res) => {
+  try {
+    const snap = await db.collection("stores").limit(1).get()
+
+    res.json({
+      success: true,
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      hasPrivateKey: !!process.env.FIREBASE_PRIVATE_KEY,
+      privateKeyLooksValid: process.env.FIREBASE_PRIVATE_KEY?.includes("BEGIN PRIVATE KEY"),
+      docs: snap.size,
+    })
+  } catch (error) {
+    console.error("debug-admin error:", {
+      message: error.message,
+      code: error.code,
+      details: error.details,
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      hasPrivateKey: !!process.env.FIREBASE_PRIVATE_KEY,
+      privateKeyLooksValid: process.env.FIREBASE_PRIVATE_KEY?.includes("BEGIN PRIVATE KEY"),
+    })
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+      code: error.code,
+      details: error.details,
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      hasPrivateKey: !!process.env.FIREBASE_PRIVATE_KEY,
+      privateKeyLooksValid: process.env.FIREBASE_PRIVATE_KEY?.includes("BEGIN PRIVATE KEY"),
+    })
+  }
+})
 app.listen(PORT, () => {
     console.log(`le serveur est lancé sur le http://localhost:${PORT} `)
     
