@@ -145,6 +145,14 @@ app.get("/debug-firestore", async (req, res) => {
 });
 
 
+app.get("/debug-project", (req, res) => {
+  res.json({
+    FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID,
+    GOOGLE_CLOUD_PROJECT: process.env.GOOGLE_CLOUD_PROJECT,
+    GCLOUD_PROJECT: process.env.GCLOUD_PROJECT
+  })
+})
+
 app.listen(PORT, () => {
     console.log(`le serveur est lancé sur le http://localhost:${PORT} `)
     
