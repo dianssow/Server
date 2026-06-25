@@ -153,6 +153,25 @@ app.get("/debug-project", (req, res) => {
   })
 })
 
+app.get("/debug-list-collections", async (req, res) => {
+  try {
+    const collections = await db.listCollections();
+
+    res.json({
+      success: true,
+      collections: collections.map(c => c.id)
+    });
+  } catch (e) {
+    console.error(e);
+
+    res.status(500).json({
+      success: false,
+      message: e.message,
+      code: e.code
+    });
+  }
+});
+
 app.get("/debug-firestore2", async (req, res) => {
   try {
     const doc = await db.collection("stores").limit(1).get()
