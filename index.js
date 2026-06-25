@@ -12,6 +12,8 @@ import supplierRoutes from './routes/supplier.js'
 import dotenv from "dotenv"
 import path from "path"  
 import { db } from './firebase.js'
+import admin from "firebase-admin";
+
 
 dotenv.config()
 console.log("allowedOrigins:", process.env.CAISSE, process.env.BACKOFFICE)
