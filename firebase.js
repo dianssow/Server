@@ -17,6 +17,18 @@ const serviceAccount = {
   universeDomain: process.env.FIREBASE_UNIVERSEDOMAIN,
 }
 
+
+
+console.log("FULL SERVICE ACCOUNT CHECK:", JSON.stringify({
+  type: serviceAccount.type,
+  projectId: serviceAccount.projectId,
+  hasPrivateKeyId: !!serviceAccount.privateKeyId,
+  privateKeyStart: serviceAccount.privateKey?.substring(0, 50),
+  clientEmail: serviceAccount.clientEmail,
+  clientId: serviceAccount.clientId,
+  universeDomain: serviceAccount.universeDomain,
+}, null, 2))
+
 const app = getApps().length
   ? getApps()[0]
   : initializeApp({
