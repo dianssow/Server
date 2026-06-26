@@ -21,7 +21,7 @@ console.log("allowedOrigins:", process.env.CAISSE, process.env.BACKOFFICE)
 
 const allowedOrigins = [
     process.env.CAISSE || 'https://gap-caisse.web.app',
-    process.env.BACKOFFICE  || 'https://gap-backoffice.web.app',  
+    process.env.BACKOFFICE  || 'https://backoffice-gap.web.app',  
     'http://localhost:5173',
     'http://localhost:5174'
 ]
