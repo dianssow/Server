@@ -1,10 +1,7 @@
-
-
 import "dotenv/config"
 import { cert, getApps, initializeApp } from "firebase-admin/app"
 import { getFirestore, FieldValue, Timestamp } from "firebase-admin/firestore"
 import { getStorage } from "firebase-admin/storage"
-
 
 const serviceAccount = {
   type: process.env.FIREBASE_TYPE,
@@ -20,14 +17,6 @@ const serviceAccount = {
   universeDomain: process.env.FIREBASE_UNIVERSEDOMAIN,
 }
 
-
-console.log("DEBUG FIREBASE CONFIG:", {
-  projectId: serviceAccount.projectId,
-  clientEmail: serviceAccount.clientEmail,
-  hasKey: !!serviceAccount.privateKey,
-  certUrl: serviceAccount.clientC509CertUrl // Vérifiez si c'est bien défini !
-});
-
 const app = getApps().length
   ? getApps()[0]
   : initializeApp({
@@ -36,8 +25,9 @@ const app = getApps().length
     })
 
 const db = getFirestore(app)
-const bucket = getStorage(app).bucket()
+db.settings({ preferRest: true })  // ← Ajoute cette ligne
 
+const bucket = getStorage(app).bucket()
 export { db, FieldValue, Timestamp, bucket }
 
 
