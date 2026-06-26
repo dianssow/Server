@@ -13,7 +13,7 @@ const serviceAccount = {
   authUri: process.env.FIREBASE_AUTH_URL,
   tokenUri: process.env.FIREBASE_TOKEN_URL,
   authProviderX509CertUrl: process.env.FIREBASE_AUTH_PROVIDER,
-  clientC509CertUrl: process.env.FIREBASE_CLIENT_X,
+  clientX509CertUrl: process.env.FIREBASE_CLIENT_X,
   universeDomain: process.env.FIREBASE_UNIVERSEDOMAIN,
 }
 
